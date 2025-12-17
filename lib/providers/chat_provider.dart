@@ -14,11 +14,15 @@ import '../api/openrouter_client.dart';
 import '../services/database_service.dart';
 // Импорт сервиса для аналитики
 import '../services/analytics_service.dart';
+// Импорт сервиса авторизации
+import '../services/auth_service.dart';
 
 // Основной класс провайдера для управления состоянием чата
 class ChatProvider with ChangeNotifier {
   // Клиент для работы с API
-  final OpenRouterClient _api = OpenRouterClient();
+  OpenRouterClient? _api;
+  // Сервис авторизации
+  late final AuthService _authService;
   // Список сообщений чата
   final List<ChatMessage> _messages = [];
   // Логи для отладки
@@ -52,12 +56,16 @@ class ChatProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   // Геттер для получения базового URL
-  String? get baseUrl => _api.baseUrl;
+  String? get baseUrl => _api?.baseUrl;
 
-  // Конструктор провайдера
-  ChatProvider() {
-    // Инициализация провайдера
-    _initializeProvider();
+  // Приватный конструктор
+  ChatProvider._();
+
+  // Статический метод для создания провайдера
+  static Future<ChatProvider> create() async {
+    final provider = ChatProvider._();
+    await provider._initializeProvider();
+    return provider;
   }
 
   // Метод инициализации провайдера
@@ -65,27 +73,47 @@ class ChatProvider with ChangeNotifier {
     try {
       // Логирование начала инициализации
       _log('Initializing provider...');
-      // Загрузка доступных моделей
-      await _loadModels();
-      _log('Models loaded: $_availableModels');
-      // Загрузка баланса
-      await _loadBalance();
-      _log('Balance loaded: $_balance');
-      // Загрузка истории сообщений
-      await _loadHistory();
-      _log('History loaded: ${_messages.length} messages');
+
+      // Инициализация сервиса авторизации
+      _authService = await AuthService.create();
+      final authData = await _authService.getAuthData();
+
+      if (authData != null) {
+        // Инициализация API клиента с сохраненным ключом
+        _api = OpenRouterClient(
+          apiKey: authData.apiKey,
+          baseUrl: authData.provider == 'vsegpt'
+              ? 'https://api.vsetgpt.ru/v1'
+              : 'https://openrouter.ai/api/v1',
+        );
+
+        // Загрузка доступных моделей
+        await _loadModels();
+        _log('Models loaded: $_availableModels');
+        // Загрузка баланса
+        await _loadBalance();
+        _log('Balance loaded: $_balance');
+        // Загрузка истории сообщений
+        await _loadHistory();
+        _log('History loaded: ${_messages.length} messages');
+      } else {
+        _log('No auth data found - will initialize after login');
+      }
     } catch (e, stackTrace) {
       // Логирование ошибок инициализации
       _log('Error initializing provider: $e');
       _log('Stack trace: $stackTrace');
+      rethrow;
     }
   }
 
   // Метод загрузки доступных моделей
   Future<void> _loadModels() async {
+    if (_api == null) return;
+
     try {
       // Получение списка моделей из API
-      _availableModels = await _api.getModels();
+      _availableModels = await _api!.getModels();
       // Сортировка моделей по имени по возрастанию
       _availableModels
           .sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
@@ -103,9 +131,11 @@ class ChatProvider with ChangeNotifier {
 
   // Метод загрузки баланса пользователя
   Future<void> _loadBalance() async {
+    if (_api == null) return;
+
     try {
       // Получение баланса из API
-      _balance = await _api.getBalance();
+      _balance = await _api!.getBalance();
       // Уведомление слушателей об изменениях
       notifyListeners();
     } catch (e) {
@@ -176,8 +206,12 @@ class ChatProvider with ChangeNotifier {
       // Запись времени начала отправки
       final startTime = DateTime.now();
 
+      if (_api == null) {
+        throw Exception('API client not initialized');
+      }
+
       // Отправка сообщения в API
-      final response = await _api.sendMessage(content, _currentModel!);
+      final response = await _api!.sendMessage(content, _currentModel!);
       // Логирование ответа API
       _log('API Response: $response');
 
@@ -360,7 +394,7 @@ class ChatProvider with ChangeNotifier {
   }
 
   String formatPricing(double pricing) {
-    return _api.formatPricing(pricing);
+    return _api?.formatPricing(pricing) ?? '\$0.00';
   }
 
   // Метод экспорта истории

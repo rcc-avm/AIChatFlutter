@@ -10,30 +10,24 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 // Класс клиента для работы с API OpenRouter
 class OpenRouterClient {
   // API ключ для авторизации
-  final String? apiKey;
+  final String apiKey;
   // Базовый URL API
-  final String? baseUrl;
+  final String baseUrl;
   // Заголовки HTTP запросов
   final Map<String, String> headers;
 
-  // Единственный экземпляр класса (Singleton)
-  static final OpenRouterClient _instance = OpenRouterClient._internal();
-
-  // Фабричный метод для получения экземпляра
-  factory OpenRouterClient() {
-    return _instance;
-  }
-
-  // Приватный конструктор для реализации Singleton
-  OpenRouterClient._internal()
-      : apiKey =
-            dotenv.env['OPENROUTER_API_KEY'], // Получение API ключа из .env
-        baseUrl = dotenv.env['BASE_URL'], // Получение базового URL из .env
+  // Конструктор
+  OpenRouterClient({
+    String? apiKey,
+    String? baseUrl,
+  })  : apiKey = apiKey ?? dotenv.env['OPENROUTER_API_KEY'] ?? '',
+        baseUrl =
+            baseUrl ?? dotenv.env['BASE_URL'] ?? 'https://openrouter.ai/api/v1',
         headers = {
           'Authorization':
-              'Bearer ${dotenv.env['OPENROUTER_API_KEY']}', // Заголовок авторизации
-          'Content-Type': 'application/json', // Указание типа контента
-          'X-Title': 'AI Chat Flutter', // Название приложения
+              'Bearer ${apiKey ?? dotenv.env['OPENROUTER_API_KEY']}',
+          'Content-Type': 'application/json',
+          'X-Title': 'AI Chat Flutter',
         } {
     // Инициализация клиента
     _initializeClient();
@@ -48,12 +42,8 @@ class OpenRouterClient {
       }
 
       // Проверка наличия API ключа
-      if (apiKey == null) {
-        throw Exception('OpenRouter API key not found in .env');
-      }
-      // Проверка наличия базового URL
-      if (baseUrl == null) {
-        throw Exception('BASE_URL not found in .env');
+      if (apiKey.isEmpty) {
+        throw Exception('OpenRouter API key not provided');
       }
 
       if (kDebugMode) {

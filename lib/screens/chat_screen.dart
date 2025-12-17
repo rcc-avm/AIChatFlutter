@@ -10,6 +10,10 @@ import 'package:google_fonts/google_fonts.dart';
 import '../providers/chat_provider.dart';
 // Импорт модели сообщения
 import '../models/message.dart';
+// Импорт сервиса авторизации
+import '../services/auth_service.dart';
+// Импорт экрана авторизации
+import 'auth_screen.dart';
 
 // Виджет для обработки ошибок в UI
 class ErrorBoundary extends StatelessWidget {
@@ -229,8 +233,30 @@ class _MessageInputState extends State<_MessageInput> {
 }
 
 // Основной экран чата
-class ChatScreen extends StatelessWidget {
+class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
+
+  @override
+  State<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _checkAuth();
+  }
+
+  Future<void> _checkAuth() async {
+    final authService = await AuthService.create();
+    final hasAuth = await authService.hasAuthData();
+
+    if (!hasAuth && mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const AuthScreen()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -273,8 +299,10 @@ class ChatScreen extends StatelessWidget {
   Widget _buildModelSelector(BuildContext context) {
     return Consumer<ChatProvider>(
       builder: (context, chatProvider, child) {
-        return SizedBox(
-          width: MediaQuery.of(context).size.width * 0.6,
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.6,
+          ),
           child: DropdownButton<String>(
             value: chatProvider.currentModel,
             hint: const Text(
@@ -298,50 +326,58 @@ class ChatScreen extends StatelessWidget {
                 .map<DropdownMenuItem<String>>((Map<String, dynamic> model) {
               return DropdownMenuItem<String>(
                 value: model['id'],
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      model['name'] ?? '',
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Tooltip(
-                          message: 'Входные токены',
-                          child: const Icon(Icons.arrow_upward, size: 12),
-                        ),
-                        Text(
-                          chatProvider.formatPricing(
-                              double.tryParse(model['pricing']?['prompt']) ??
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 300),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        model['name'] ?? '',
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      const SizedBox(height: 4),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Tooltip(
+                              message: 'Входные токены',
+                              child: const Icon(Icons.arrow_upward, size: 12),
+                            ),
+                            Text(
+                              chatProvider.formatPricing(double.tryParse(
+                                      model['pricing']?['prompt']) ??
                                   0.0),
-                          style: const TextStyle(fontSize: 10),
+                              style: const TextStyle(fontSize: 10),
+                            ),
+                            const SizedBox(width: 8),
+                            Tooltip(
+                              message: 'Генерация',
+                              child: const Icon(Icons.arrow_downward, size: 12),
+                            ),
+                            Text(
+                              chatProvider.formatPricing(double.tryParse(
+                                      model['pricing']?['completion']) ??
+                                  0.0),
+                              style: const TextStyle(fontSize: 10),
+                            ),
+                            const SizedBox(width: 8),
+                            Tooltip(
+                              message: 'Контекст',
+                              child: const Icon(Icons.memory, size: 12),
+                            ),
+                            Text(
+                              ' ${model['context_length'] ?? '0'}',
+                              style: const TextStyle(fontSize: 10),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        Tooltip(
-                          message: 'Генерация',
-                          child: const Icon(Icons.arrow_downward, size: 12),
-                        ),
-                        Text(
-                          chatProvider.formatPricing(double.tryParse(
-                                  model['pricing']?['completion']) ??
-                              0.0),
-                          style: const TextStyle(fontSize: 10),
-                        ),
-                        const SizedBox(width: 8),
-                        Tooltip(
-                          message: 'Контекст',
-                          child: const Icon(Icons.memory, size: 12),
-                        ),
-                        Text(
-                          ' ${model['context_length'] ?? '0'}',
-                          style: const TextStyle(fontSize: 10),
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
               );
             }).toList(),
