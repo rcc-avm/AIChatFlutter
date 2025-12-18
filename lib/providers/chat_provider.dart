@@ -6,6 +6,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 // Импорт пакета для получения путей к директориям
 import 'package:path_provider/path_provider.dart';
+// Импорт для работы с .env
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 // Импорт модели сообщения
 import '../models/message.dart';
 // Импорт клиента для работы с API
@@ -80,11 +82,13 @@ class ChatProvider with ChangeNotifier {
 
       if (authData != null) {
         // Инициализация API клиента с сохраненным ключом
+        // Определяем базовый URL по формату ключа, а не по сохраненному провайдеру
+        final baseUrl = authData.apiKey.startsWith('sk-or-vv-')
+            ? 'https://api.vsegpt.ru/v1'
+            : 'https://openrouter.ai/api/v1';
         _api = OpenRouterClient(
           apiKey: authData.apiKey,
-          baseUrl: authData.provider == 'vsegpt'
-              ? 'https://api.vsetgpt.ru/v1'
-              : 'https://openrouter.ai/api/v1',
+          baseUrl: baseUrl,
         );
 
         // Загрузка доступных моделей
@@ -97,7 +101,29 @@ class ChatProvider with ChangeNotifier {
         await _loadHistory();
         _log('History loaded: ${_messages.length} messages');
       } else {
-        _log('No auth data found - will initialize after login');
+        // Если данных авторизации нет, используем ключ из .env
+        final envApiKey = dotenv.env['OPENROUTER_API_KEY'] ?? '';
+        if (envApiKey.isNotEmpty) {
+          _log('Using API key from .env');
+          final baseUrl = envApiKey.startsWith('sk-or-vv-')
+              ? 'https://api.vsegpt.ru/v1'
+              : 'https://openrouter.ai/api/v1';
+          _api = OpenRouterClient(
+            apiKey: envApiKey,
+            baseUrl: baseUrl,
+          );
+          // Загрузка доступных моделей
+          await _loadModels();
+          _log('Models loaded: $_availableModels');
+          // Загрузка баланса
+          await _loadBalance();
+          _log('Balance loaded: $_balance');
+          // Загрузка истории сообщений
+          await _loadHistory();
+          _log('History loaded: ${_messages.length} messages');
+        } else {
+          _log('No auth data found - will initialize after login');
+        }
       }
     } catch (e, stackTrace) {
       // Логирование ошибок инициализации

@@ -71,7 +71,7 @@ class _ExpenseChartScreenState extends State<ExpenseChartScreen> {
   @override
   Widget build(BuildContext context) {
     final chatProvider = context.read<ChatProvider>();
-    final isVsetgpt = chatProvider.baseUrl?.contains('vsetgpt.ru') == true;
+    final isVsetgpt = chatProvider.baseUrl?.contains('vsegpt.ru') == true;
 
     return Scaffold(
       backgroundColor: const Color(0xFF1E1E1E),

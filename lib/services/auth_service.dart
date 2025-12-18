@@ -134,7 +134,7 @@ class AuthService {
       final client = OpenRouterClient(
         apiKey: apiKey,
         baseUrl: apiKey.startsWith('sk-or-vv-')
-            ? 'https://api.vsetgpt.ru/v1'
+            ? 'https://api.vsegpt.ru/v1'
             : 'https://openrouter.ai/api/v1',
       );
       final balance = await client.getBalance();

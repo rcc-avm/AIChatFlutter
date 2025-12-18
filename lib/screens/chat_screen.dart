@@ -106,8 +106,7 @@ class _MessageBubble extends StatelessWidget {
                     Consumer<ChatProvider>(
                       builder: (context, chatProvider, child) {
                         final isVsetgpt =
-                            chatProvider.baseUrl?.contains('vsetgpt.ru') ==
-                                true;
+                            chatProvider.baseUrl?.contains('vsegpt.ru') == true;
                         return Text(
                           message.cost! < 0.001
                               ? isVsetgpt
@@ -324,8 +323,16 @@ class _ChatScreenState extends State<ChatScreen> {
             },
             items: chatProvider.availableModels
                 .map<DropdownMenuItem<String>>((Map<String, dynamic> model) {
+              final modelId = model['id'] as String? ?? 'unknown';
+              final modelName = model['name'] as String? ?? 'Unknown Model';
+              final promptPricing =
+                  model['pricing']?['prompt'] as String? ?? '0';
+              final completionPricing =
+                  model['pricing']?['completion'] as String? ?? '0';
+              final contextLength = model['context_length'] as String? ?? '0';
+
               return DropdownMenuItem<String>(
-                value: model['id'],
+                value: modelId,
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 300),
                   child: Column(
@@ -333,7 +340,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        model['name'] ?? '',
+                        modelName,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontSize: 12),
                       ),
@@ -348,9 +355,8 @@ class _ChatScreenState extends State<ChatScreen> {
                               child: const Icon(Icons.arrow_upward, size: 12),
                             ),
                             Text(
-                              chatProvider.formatPricing(double.tryParse(
-                                      model['pricing']?['prompt']) ??
-                                  0.0),
+                              chatProvider.formatPricing(
+                                  double.tryParse(promptPricing) ?? 0.0),
                               style: const TextStyle(fontSize: 10),
                             ),
                             const SizedBox(width: 8),
@@ -359,9 +365,8 @@ class _ChatScreenState extends State<ChatScreen> {
                               child: const Icon(Icons.arrow_downward, size: 12),
                             ),
                             Text(
-                              chatProvider.formatPricing(double.tryParse(
-                                      model['pricing']?['completion']) ??
-                                  0.0),
+                              chatProvider.formatPricing(
+                                  double.tryParse(completionPricing) ?? 0.0),
                               style: const TextStyle(fontSize: 10),
                             ),
                             const SizedBox(width: 8),
@@ -370,7 +375,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               child: const Icon(Icons.memory, size: 12),
                             ),
                             Text(
-                              ' ${model['context_length'] ?? '0'}',
+                              ' $contextLength',
                               style: const TextStyle(fontSize: 10),
                             ),
                           ],
@@ -670,7 +675,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 Consumer<ChatProvider>(
                                   builder: (context, chatProvider, child) {
                                     final isVsetgpt = chatProvider.baseUrl
-                                            ?.contains('vsetgpt.ru') ==
+                                            ?.contains('vsegpt.ru') ==
                                         true;
                                     return Text(
                                       isVsetgpt

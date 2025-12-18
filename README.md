@@ -113,6 +113,6 @@ AIChatFlutter - это мультиплатформенное приложени
 
 Для работы приложения необходимо указать в файле `.env`:
 - `OPENROUTER_API_KEY` - API ключ от OpenRouter.ai или VseGPT.ru
-- `BASE_URL` - URL API (https://openrouter.ai/api/v1 или https://api.vsetgpt.ru/v1)
+- `BASE_URL` - URL API (https://openrouter.ai/api/v1 или https://api.vsegpt.ru/v1)
 - `MAX_TOKENS` - Максимальное количество токенов для ответа
 - `TEMPERATURE` - Температура генерации (0.0 - 1.0)

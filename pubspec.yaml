@@ -34,3 +34,4 @@ flutter:
   
   assets:
     - .env
+    - assets/app_settings.json

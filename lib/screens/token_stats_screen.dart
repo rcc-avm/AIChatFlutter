@@ -201,7 +201,7 @@ class _TokenStatsScreenState extends State<TokenStatsScreen> {
                               Consumer<ChatProvider>(
                                 builder: (context, chatProvider, child) {
                                   final isVsetgpt = chatProvider.baseUrl
-                                          ?.contains('vsetgpt.ru') ==
+                                          ?.contains('vsegpt.ru') ==
                                       true;
                                   return Text(
                                     modelStats['cost']! < 1e-8
