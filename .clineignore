@@ -1,0 +1,88 @@
+# =========================
+# Flutter / Dart
+# =========================
+
+# Dart & Pub
+.dart_tool/
+.packages
+pubspec.lock
+
+# Flutter build outputs
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/App.framework
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+
+# Android
+android/.gradle/
+android/local.properties
+android/key.properties
+android/**/build/
+
+# Linux
+linux/build/
+
+# macOS
+macos/Pods/
+macos/Flutter/ephemeral/
+macos/build/
+
+# Windows
+windows/build/
+
+# Web
+web/build/
+
+# =========================
+# IDE / OS
+# =========================
+
+.vscode/
+.idea/
+*.iml
+
+# Linux
+*.log
+*.pid
+*.swp
+*~
+.Trash-*
+
+# =========================
+# Test / Coverage
+# =========================
+
+coverage/
+test/.dart_tool/
+
+# =========================
+# Generated / Temp
+# =========================
+
+**/*.g.dart
+**/*.freezed.dart
+**/*.mocks.dart
+
+# =========================
+# Environment / Secrets
+# =========================
+
+.env
+.env.*
+*.keystore
+*.jks
+
+# =========================
+# Large assets (optional)
+# =========================
+
+assets/fonts/
+assets/images/

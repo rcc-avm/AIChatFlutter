@@ -1,5 +1,6 @@
 // Импорт основных виджетов Flutter
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 // Импорт пакета для работы с .env файлами
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 // Импорт пакета для локализации приложения
@@ -13,12 +14,20 @@ import 'providers/settings_provider.dart';
 // Импорт экранов
 import 'screens/auth_screen.dart';
 import 'screens/main_screen.dart';
+// Импорт для инициализации базы данных на десктопе
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 // Основная точка входа в приложение
 void main() async {
   try {
     // Инициализация Flutter биндингов
     WidgetsFlutterBinding.ensureInitialized();
+
+    // Инициализация базы данных для настольных платформ (Linux, Windows, macOS)
+    if (!kIsWeb) {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    }
 
     // Настройка обработки ошибок Flutter
     FlutterError.onError = (FlutterErrorDetails details) {
