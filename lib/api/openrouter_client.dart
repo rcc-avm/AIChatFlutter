@@ -136,6 +136,9 @@ class OpenRouterClient {
         'temperature': double.parse(
             dotenv.env['TEMPERATURE'] ?? '0.7'), // Температура генерации
         'stream': false, // Отключение потоковой передачи
+        // Явно отключаем tool use для моделей, которые его не поддерживают
+        'tool_choice':
+            'none', // Явное указание, что инструменты не используются
       };
 
       if (kDebugMode) {
@@ -178,7 +181,7 @@ class OpenRouterClient {
     try {
       // Выполнение GET запроса для получения баланса
       final response = await http.get(
-        Uri.parse(baseUrl?.contains('vsegpt.ru') == true
+        Uri.parse(baseUrl.contains('vsegpt.ru') == true
             ? '$baseUrl/balance'
             : '$baseUrl/credits'),
         headers: headers,
@@ -193,7 +196,7 @@ class OpenRouterClient {
         // Парсинг данных о балансе
         final data = json.decode(response.body);
         if (data != null && data['data'] != null) {
-          if (baseUrl?.contains('vsegpt.ru') == true) {
+          if (baseUrl.contains('vsegpt.ru') == true) {
             final credits =
                 double.tryParse(data['data']['credits'].toString()) ??
                     0.0; // Доступно средств
@@ -206,7 +209,7 @@ class OpenRouterClient {
           }
         }
       }
-      return baseUrl?.contains('vsegpt.ru') == true
+      return baseUrl.contains('vsegpt.ru') == true
           ? '0.00₽'
           : '\$0.00'; // Возвращение нулевого баланса по умолчанию
     } catch (e) {
@@ -220,7 +223,7 @@ class OpenRouterClient {
   // Метод форматирования цен
   String formatPricing(double pricing) {
     try {
-      if (baseUrl?.contains('vsegpt.ru') == true) {
+      if (baseUrl.contains('vsegpt.ru') == true) {
         return '${pricing.toStringAsFixed(3)}₽/K';
       } else {
         return '\$${(pricing * 1000000).toStringAsFixed(3)}/M';

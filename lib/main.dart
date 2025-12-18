@@ -6,10 +6,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 // Импорт пакета для работы с провайдерами состояния
 import 'package:provider/provider.dart';
-// Импорт кастомного провайдера для управления состоянием чата
+// Импорт кастомных провайдеров
 import 'providers/chat_provider.dart';
+import 'providers/navigation_provider.dart';
+import 'providers/settings_provider.dart';
 // Импорт экранов
 import 'screens/auth_screen.dart';
+import 'screens/main_screen.dart';
 
 // Основная точка входа в приложение
 void main() async {
@@ -29,7 +32,7 @@ void main() async {
     debugPrint('API Key present: ${dotenv.env['OPENROUTER_API_KEY'] != null}');
     debugPrint('Base URL: ${dotenv.env['BASE_URL']}');
 
-    // Создание провайдера
+    // Создание провайдеров
     final chatProvider = await ChatProvider.create().catchError((e) {
       debugPrint('Error creating ChatProvider: $e');
       // Если ошибка связана с отсутствием авторизации, это нормально
@@ -39,10 +42,15 @@ void main() async {
       throw e; // Используем throw вместо rethrow вне catch блока
     });
 
+    final navigationProvider = NavigationProvider();
+    final settingsProvider = await SettingsProvider.create();
+
     // Запуск приложения
     runApp(
       AppRoot(
         chatProvider: chatProvider,
+        navigationProvider: navigationProvider,
+        settingsProvider: settingsProvider,
       ),
     );
   } catch (e, stackTrace) {
@@ -81,16 +89,24 @@ class ErrorApp extends StatelessWidget {
 // Корневой виджет приложения
 class AppRoot extends StatelessWidget {
   final ChatProvider chatProvider;
+  final NavigationProvider navigationProvider;
+  final SettingsProvider settingsProvider;
 
   const AppRoot({
     super.key,
     required this.chatProvider,
+    required this.navigationProvider,
+    required this.settingsProvider,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: chatProvider,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: chatProvider),
+        ChangeNotifierProvider.value(value: navigationProvider),
+        ChangeNotifierProvider.value(value: settingsProvider),
+      ],
       child: MaterialApp(
         builder: (context, child) {
           return ScrollConfiguration(

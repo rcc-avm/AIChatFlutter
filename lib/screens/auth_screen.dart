@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
-import '../models/auth_data.dart';
 import '../providers/chat_provider.dart';
-import 'chat_screen.dart';
+import 'main_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -69,7 +68,7 @@ class _AuthScreenState extends State<AuthScreen> {
             MaterialPageRoute(
               builder: (context) => ChangeNotifierProvider.value(
                 value: newProvider,
-                child: const ChatScreen(),
+                child: const MainScreen(),
               ),
             ),
           );
@@ -111,7 +110,7 @@ class _AuthScreenState extends State<AuthScreen> {
             MaterialPageRoute(
               builder: (context) => ChangeNotifierProvider.value(
                 value: newProvider,
-                child: const ChatScreen(),
+                child: const MainScreen(),
               ),
             ),
           );
