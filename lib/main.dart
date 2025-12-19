@@ -1,7 +1,6 @@
 // Импорт основных виджетов Flutter
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:io';
 // Импорт пакета для работы с .env файлами
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 // Импорт пакета для локализации приложения
@@ -14,7 +13,6 @@ import 'providers/navigation_provider.dart';
 import 'providers/settings_provider.dart';
 // Импорт экранов
 import 'screens/auth_screen.dart';
-import 'screens/main_screen.dart';
 // Импорт для инициализации базы данных на десктопе
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -25,7 +23,7 @@ void main() async {
     WidgetsFlutterBinding.ensureInitialized();
 
     // Инициализация базы данных для настольных платформ (Linux, Windows, macOS)
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    if (!kIsWeb) {
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
     }
