@@ -449,7 +449,7 @@ class _ChatScreenState extends State<ChatScreen> {
             }
             break;
           case 'clear':
-            _showClearHistoryDialog(context);
+            await _clearHistory(context);
             break;
         }
       },
@@ -557,7 +557,7 @@ class _ChatScreenState extends State<ChatScreen> {
             icon: Icons.delete,
             label: 'Очистить',
             color: const Color(0xFFCC3333),
-            onPressed: () => _showClearHistoryDialog(context),
+            onPressed: () => _clearHistory(context),
           ),
         ],
       ),
@@ -704,39 +704,28 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  // Отображение диалога подтверждения очистки истории
-  void _showClearHistoryDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF333333),
-          title: const Text(
-            'Очистить историю',
-            style: TextStyle(color: Colors.white, fontSize: 14),
+  // Очистка истории без диалога подтверждения
+  Future<void> _clearHistory(BuildContext context) async {
+    final chatProvider = context.read<ChatProvider>();
+    try {
+      await chatProvider.clearHistory();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('История очищена'),
+            backgroundColor: Colors.green,
           ),
-          content: const Text(
-            'Вы уверены? Это действие нельзя отменить.',
-            style: TextStyle(color: Colors.white70, fontSize: 12),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Отмена', style: TextStyle(fontSize: 12)),
-            ),
-            TextButton(
-              onPressed: () {
-                context.read<ChatProvider>().clearHistory();
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'Очистить',
-                style: TextStyle(color: Colors.red, fontSize: 12),
-              ),
-            ),
-          ],
         );
-      },
-    );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка при очистке: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
