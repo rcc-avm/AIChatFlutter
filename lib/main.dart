@@ -1,6 +1,7 @@
 // Импорт основных виджетов Flutter
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:io';
 // Импорт пакета для работы с .env файлами
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 // Импорт пакета для локализации приложения
@@ -23,7 +24,7 @@ void main() async {
     WidgetsFlutterBinding.ensureInitialized();
 
     // Инициализация базы данных для настольных платформ (Linux, Windows, macOS)
-    if (!kIsWeb) {
+    if (!kIsWeb && Platform.operatingSystem != 'android') {
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
     }
