@@ -198,7 +198,7 @@ AIChatFlutter - это мультиплатформенное приложени
 - Визуальные индикаторы загрузки
 
 ### Технические особенности
-- Кроссплатформенность (потенциально: Android, iOS, Windows, Linux, Web;но на настоящий момент отлажено в режиме дебага: flutter run -d <платформа> на linux, chrome и через flutter run  в эммуляторе Android в Android Studio)
+- Кроссплатформенность (потенциально: Android, iOS, Windows, Linux, Web;но на настоящий момент отлажено в режиме дебага: flutter run -d <платформа> на linux, chrome и через flutter run  в эмуляторе Android в Android Studio)
 - Локальное хранение данных с шифрованием
 - Оффлайн доступ к истории сообщений
 - Обработка ошибок сети с повторными попытками
@@ -242,7 +242,7 @@ flutter pub get
 ```bash
 flutter run
 ```
-flutter run -d <платформа> на linux, chrome и через flutter run  в эммуляторе Android в Android Studio
+flutter run -d <платформа> на linux, chrome и через flutter run  в эмуляторе Android в Android Studio
 
 Более подробно смотрите в файле INSTALL.md
 
